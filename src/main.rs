@@ -1,18 +1,18 @@
 // Heigh Kind
 trait Mappable<A> {
-    type M<T>;
-    fn map<B, F>(self, f: F) -> Self::M<B>
+    type T<_SLOT_>;
+    fn map<B, F>(self, f: F) -> Self::T<B>
     where
         F: Fn(A) -> B;
 }
 
 // First Order 1
-struct MyVec<Item>(Vec<Item>);
-impl<Item> Mappable<Item> for MyVec<Item> {
-    type M<T> = MyVec<T>;
-    fn map<B, F>(self, f: F) -> Self::M<B>
+struct MyVec<A>(Vec<A>);
+impl<A> Mappable<A> for MyVec<A> {
+    type T<_SLOT_> = MyVec<_SLOT_>;
+    fn map<B, F>(self, f: F) -> Self::T<B>
     where
-        F: Fn(Item) -> B,
+        F: Fn(A) -> B,
     {
         let MyVec(vec) = self;
         let mut mapped = Vec::with_capacity(vec.len());
@@ -28,12 +28,12 @@ type MyNumbers = MyVec<i32>;
 type MyStrings = MyVec<String>;
 
 // First Order 2
-struct MyMap<Item>(std::collections::HashMap<String, Item>);
-impl<Item> Mappable<Item> for MyMap<Item> {
-    type M<T> = MyMap<T>;
-    fn map<B, F>(self, f: F) -> Self::M<B>
+struct MyMap<A>(std::collections::HashMap<String, A>);
+impl<A> Mappable<A> for MyMap<A> {
+    type T<_SLOT_> = MyMap<_SLOT_>;
+    fn map<B, F>(self, f: F) -> Self::T<B>
     where
-        F: Fn(Item) -> B,
+        F: Fn(A) -> B,
     {
         let MyMap(map) = self;
         let mut mapped = std::collections::HashMap::with_capacity(map.len());
