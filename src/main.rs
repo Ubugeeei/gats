@@ -1,37 +1,76 @@
-trait LendingIterator {
-    type Item<'a>
+// Heigh Kind
+trait Mappable<A> {
+    type M<T>;
+    fn map<B, F>(self, f: F) -> Self::M<B>
     where
-        Self: 'a;
-
-    fn next<'a>(&'a mut self) -> Option<Self::Item<'a>>;
+        F: Fn(A) -> B;
 }
 
-struct Iterable {
-    cursor: usize,
-    value: Vec<i32>,
-}
-
-impl LendingIterator for Iterable {
-    type Item<'a> = &'a i32;
-
-    fn next<'a>(&'a mut self) -> Option<Self::Item<'a>> {
-        if self.cursor < self.value.len() {
-            let result = &self.value[self.cursor];
-            self.cursor += 1;
-            Some(result)
-        } else {
-            None
+// First Order 1
+struct MyVec<Item>(Vec<Item>);
+impl<Item> Mappable<Item> for MyVec<Item> {
+    type M<T> = MyVec<T>;
+    fn map<B, F>(self, f: F) -> Self::M<B>
+    where
+        F: Fn(Item) -> B,
+    {
+        let MyVec(vec) = self;
+        let mut mapped = Vec::with_capacity(vec.len());
+        for item in vec {
+            mapped.push(f(item));
         }
+        MyVec(mapped)
     }
 }
+// Proper 1 of First Order 1
+type MyNumbers = MyVec<i32>;
+// Proper 2 of First Order 1
+type MyStrings = MyVec<String>;
+
+// First Order 2
+struct MyMap<Item>(std::collections::HashMap<String, Item>);
+impl<Item> Mappable<Item> for MyMap<Item> {
+    type M<T> = MyMap<T>;
+    fn map<B, F>(self, f: F) -> Self::M<B>
+    where
+        F: Fn(Item) -> B,
+    {
+        let MyMap(map) = self;
+        let mut mapped = std::collections::HashMap::with_capacity(map.len());
+        for (key, item) in map {
+            mapped.insert(key, f(item));
+        }
+        MyMap(mapped)
+    }
+}
+impl<Item> MyMap<Item> {
+    fn insert(&mut self, key: String, value: Item) {
+        self.0.insert(key, value);
+    }
+}
+// Proper 1 of First Order 2
+type MyMapNumbers = MyMap<i32>;
+// Proper 2 of First Order 2
+type MyMapStrings = MyMap<String>;
 
 fn main() {
-    let mut iterable = Iterable {
-        cursor: 0,
-        value: vec![1, 2, 3],
-    };
+    // ①
+    let my_vec: MyNumbers = MyVec(vec![1, 2, 3]);
+    let _mapped: MyNumbers = my_vec.map(|x| x + 1); // map
 
-    while let Some(value) = iterable.next() {
-        println!("{}", value);
-    }
+    // ②
+    let my_vec: MyStrings = MyVec(vec![String::from("one"), String::from("two")]);
+    let _mapped: MyStrings = my_vec.map(|x| x + "1"); // map
+
+    // ③
+    let mut my_map: MyMapNumbers = MyMap(std::collections::HashMap::new());
+    my_map.insert(String::from("one"), 1);
+    my_map.insert(String::from("two"), 2);
+    let _mapped: MyMapNumbers = my_map.map(|x| x + 1); // map
+
+    // ④
+    let mut my_map: MyMapStrings = MyMap(std::collections::HashMap::new());
+    my_map.insert(String::from("one"), String::from("one"));
+    my_map.insert(String::from("two"), String::from("two"));
+    let _mapped: MyMapStrings = my_map.map(|x| x + "1"); // map
 }
