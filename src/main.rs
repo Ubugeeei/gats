@@ -1,6 +1,6 @@
 // Heigh Kind
 trait Mappable<A> {
-    type T<_SLOT_>;
+    type T<__>;
     fn map<B, F>(self, f: F) -> Self::T<B>
     where
         F: Fn(A) -> B;
@@ -9,7 +9,7 @@ trait Mappable<A> {
 // First Order 1
 struct MyVec<A>(Vec<A>);
 impl<A> Mappable<A> for MyVec<A> {
-    type T<_SLOT_> = MyVec<_SLOT_>;
+    type T<__> = MyVec<__>;
     fn map<B, F>(self, f: F) -> Self::T<B>
     where
         F: Fn(A) -> B,
@@ -30,7 +30,7 @@ type MyStrings = MyVec<String>;
 // First Order 2
 struct MyMap<A>(std::collections::HashMap<String, A>);
 impl<A> Mappable<A> for MyMap<A> {
-    type T<_SLOT_> = MyMap<_SLOT_>;
+    type T<__> = MyMap<__>;
     fn map<B, F>(self, f: F) -> Self::T<B>
     where
         F: Fn(A) -> B,
